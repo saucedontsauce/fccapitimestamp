@@ -8,7 +8,7 @@ var app = express();
 // enable CORS (https://en.wikipedia.org/wiki/Cross-origin_resource_sharing)
 // so that your API is remotely testable by FCC 
 var cors = require('cors');
-app.use(cors({optionsSuccessStatus: 200}));  // some legacy browsers choke on 204
+app.use(cors({ optionsSuccessStatus: 200 }));  // some legacy browsers choke on 204
 
 // http://expressjs.com/en/starter/static-files.html
 app.use(express.static('public'));
@@ -21,21 +21,35 @@ app.get("/", function (req, res) {
 
 // your first API endpoint... 
 app.get("/api/hello", function (req, res) {
-  res.json({greeting: 'hello API'});
+  res.json({ greeting: 'hello API' });
 });
 
-app.get('/api/:date', (req,res)=>{
+app.get('/api/:date?', (req, res) => {
+  let d = req.params.date
   let data = {}
-  if(/-/.test(req.params.date)){
-    console.log('hyphenated')
-    data.utc = new Date(req.params.date).toString()
-    data.unix = Date.parse(new Date(req.params.date))
+  if (/\d{4}\-\d{1,2}\-\d{1,2}/.test(d)) {
+    console.log('is a pretty date')
+
+
+    let nt = new Date(d)
+    data.utc = nt.toString()
+    data.unix = Date.parse(nt)
+
+  } else if (/^\d+$/.test(d)) {
+    console.log('is a unix timestamp')
+    let rn = new Date()
+    let td = rn - d
+    let nd = new Date(rn - td)
+    data.unix = Date.parse(nd)
+    data.utc = nd.toString()
+  } else if (!d) {
+    data.utc = new Date().toString()
+    data.unix = Date.parse(data.utc)
   } else {
-    console.log('not hyphenated')
-    data.unix = req.params.date
-    data.utc = new Date(0,0,0,0,0,0,req.params.date).toString()
+    res.json({error:"Invalid Date"})
   }
-  res.json(data)
+
+
 })
 
 
