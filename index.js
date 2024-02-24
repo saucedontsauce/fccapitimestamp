@@ -29,12 +29,10 @@ app.get('/api/:date?', (req, res) => {
   let data = {}
   if (/\d{4}\-\d{1,2}\-\d{1,2}/.test(d)) {
     console.log('is a pretty date')
-
-
     let nt = new Date(d)
     data.utc = nt.toString()
     data.unix = Date.parse(nt)
-
+    res.json(data)
   } else if (/^\d+$/.test(d)) {
     console.log('is a unix timestamp')
     let rn = new Date()
@@ -42,9 +40,11 @@ app.get('/api/:date?', (req, res) => {
     let nd = new Date(rn - td)
     data.unix = Date.parse(nd)
     data.utc = nd.toString()
+    res.json(data)
   } else if (!d) {
     data.utc = new Date().toString()
-    data.unix = Date.parse(data.utc)
+    data.unix = Date.parse(new Date())
+    res.json(data)
   } else {
     res.json({error:"Invalid Date"})
   }
