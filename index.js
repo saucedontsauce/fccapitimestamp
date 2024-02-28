@@ -24,32 +24,36 @@ app.get("/api/hello", function (req, res) {
   res.json({ greeting: 'hello API' });
 });
 
-app.get('/api/:date?', (req, res) => {
-  let d = req.params.date
-  let data = {}
-  if (/\d{4}\-\d{1,2}\-\d{1,2}/.test(d)) {
-    console.log('is a pretty date')
-    let nt = new Date(d)
-    data.utc = nt.toString()
-    data.unix = Date.parse(nt)
-    res.json(data)
-  } else if (/^\d+$/.test(d)) {
-    console.log('is a unix timestamp')
-    let rn = new Date()
-    let td = rn - d
-    let nd = new Date(rn - td)
-    data.unix = Date.parse(nd)
-    data.utc = nd.toString()
-    res.json(data)
-  } else if (!d) {
-    data.utc = new Date().toString()
-    data.unix = Date.parse(new Date())
-    res.json(data)
+app.get('/api', (req, res) => {
+  res.json({ "unix": new Date(Date.now()).getTime(), "utc": new Date(Date.now()).toUTCString() })
+})
+app.get("/api/:date", (req, res) => {
+  let rdata = { "unix": "", "utc": "" }
+  if (!req.params.date) {
+    console.log('No params present. defaulting to current date.')
+    rdata.unix = new Date(Date.now()).getTime()
+    rdata.utc = new Date(Date.now()).toUTCString()
+    res.json(rdata)
   } else {
-    res.json({error:"Invalid Date"})
+    let pd = req.params.date
+    if (!isNaN(Number(pd))) {
+      console.log("no punctuation just numbers", pd)
+      let ppd = new Date(Number(pd))
+      rdata.unix = ppd.getTime()
+      rdata.utc = ppd.toUTCString()
+      res.json(rdata)
+    } else {
+      let ppd = new Date(pd)
+      if (ppd == "Invalid Date") {
+        res.json({ error: "Invalid Date" })
+      } else {
+
+        rdata.utc = ppd.toUTCString()
+        rdata.unix = ppd.getTime()
+        res.json(rdata)
+      }
+    }
   }
-
-
 })
 
 
